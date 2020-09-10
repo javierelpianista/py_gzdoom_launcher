@@ -36,7 +36,7 @@ class CreateProfileWindow(tk.Toplevel):
         self.config_file_entry.delete(0, tk.END)
         self.config_file_entry.insert(0, config_filename)
 
-    def create_profile(self):
+    def create_profile(self, parent):
         selected_iwad = self.iwads_listbox.get(self.iwads_listbox.curselection())
         selected_wads_list = [self.wads_listbox.get(x) for x in self.wads_listbox.curselection()]
         profile_name = self.profile_entry.get()
@@ -64,9 +64,13 @@ class CreateProfileWindow(tk.Toplevel):
                     title    = 'Profile created', 
                     message  = 'Profile {} created successfully'.format(profile_name)
                     )
+            # Update the parent's listbox with the new profile
+            parent.profile_listbox.update()
 
     def __init__(self, parent):
-        super().__init__(parent)
+        super().__init__(
+                master = parent
+                )
 
         #self = tk.Toplevel(parent)
         self.title('Profile generator')
@@ -210,95 +214,16 @@ class CreateProfileWindow(tk.Toplevel):
         self.profile_button = ttk.Button(
                 master  = self.frame_buttons,
                 text    = 'Create profile', 
-                command = self.create_profile,
+                command = lambda: self.create_profile(parent),
                 )
 
         self.profile_button.pack(side = tk.LEFT, expand = True, fill = tk.X, padx = 5)
 
-        self.cancel_button = ttk.Button(
+        self.back_button = ttk.Button(
                 master  = self.frame_buttons,
-                text    = "Cancel",
+                text    = "Back",
                 command = lambda: self.cancel()
                 )
 
-        self.cancel_button.pack(side = tk.RIGHT, expand = True, fill = tk.X, padx = 5)
+        self.back_button.pack(side = tk.RIGHT, expand = True, fill = tk.X, padx = 5)
         self.frame_buttons.pack(fill = tk.X, pady = 5)
-
-#
-## These lists will contain the selected IWAD and WADs
-#
-#os.makedirs(main_dir, exist_ok = True)
-#
-#def cancel(window):
-#    window.destroy()
-#
-## Given a listbox, put all the selected items into the values list
-#
-## Open a dialog to select the profile file
-#def profile_file_browser():
-#    global profile_entry
-#
-#
-#def create_profile_window(root):
-#    ########################################
-#    # This frame contains the profile name #
-#    ########################################
-#    frame_profile = ttk.Frame(
-#            master = window
-#            )
-#
-#    profile_label = ttk.Label(
-#            master = frame_profile,
-#            text   = 'Profile file'
-#            )
-#
-#    profile_entry = ttk.Entry(
-#            master = frame_profile,
-#            )
-#
-#    browse_button = ttk.Button(
-#            master  = frame_profile,
-#            text    = 'Browse...',
-#            command = profile_file_browser
-#            )
-#    browse_button.pack(side = tk.RIGHT, padx = 5)
-#
-#    profile_label.pack()
-#    profile_entry.insert(0, os.path.join(profile_dir, 'default.gzd'))
-#    profile_entry.pack(side = tk.LEFT, fill = tk.X, expand = True, padx = 5)
-#
-#    #########################################################
-#    # This frame occupies the left portion of the top frame #
-#    # and contains a listbox with the available WADs        #
-#    #########################################################
-#
-#    ##################################################
-#    # These frames contain the buttons at the bottom #
-#    ##################################################
-#
-#    frame_buttons = ttk.Frame(
-#            master = window,
-#            )
-#
-#    profile_button = ttk.Button(
-#            master  = frame_buttons,
-#            text    = 'Create profile', 
-#            command = create_profile,
-#            )
-#
-#    profile_button.pack(side = tk.LEFT, expand = True, fill = tk.X, padx = 5)
-#
-#    cancel_button = ttk.Button(
-#            master  = frame_buttons,
-#            text    = "Cancel",
-#            command = lambda: cancel(window)
-#            )
-#
-#    cancel_button.pack(side = tk.RIGHT, expand = True, fill = tk.X, padx = 5)
-#
-#    frame_profile.pack(fill = tk.X, pady = 5)
-#    frame_wads.pack(pady = 5, fill = tk.BOTH, expand = True
-#        )
-#
-#    return window
-#

@@ -1,6 +1,7 @@
 import os 
 import re
-from variables import iwad_names
+import glob
+from variables import iwad_names, profile_dir
 
 def get_list_of_wad_files(wad_dirs):
     filelist = [item for wad_dir in wad_dirs.split(':') for item in os.listdir(wad_dir)]
@@ -27,3 +28,24 @@ def get_list_of_pk3_files(wad_dirs):
     selected_files = list(filter(regex.match, filelist))
 
     return selected_files
+
+def backup_profile(profile_name):
+    profile_filename = profile_name + '.gzd'
+    bak_filename = '.' + profile_filename + '.bak'
+    bak_filename_numbered = bak_filename
+    n = 0
+    while os.path.exists(os.path.join(profile_dir, bak_filename_numbered)):
+        n+=1
+        bak_filename_numbered = bak_filename + '.' + str(n)
+
+    os.rename(
+            os.path.join(profile_dir, profile_name + '.gzd'), 
+            os.path.join(profile_dir, bak_filename_numbered)
+            )
+
+def detect_profiles():
+    profile_filenames = glob.glob(os.path.join(profile_dir, '*.gzd'))
+    profile_names = sorted([os.path.splitext(os.path.basename(filename))[0] for filename in profile_filenames])
+
+    return profile_names
+
