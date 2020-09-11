@@ -1,4 +1,4 @@
-from variables import default_config_filename
+from variables import default_config_filename, default_iwad
 
 class Profile:
     def __init__(self, **kwargs):
@@ -21,7 +21,7 @@ class Profile:
     def default(cls):
         kwargs = {
                 'name'        : 'default',
-                'iwad'        : 'doom2',
+                'iwad'        : default_iwad,
                 'wads'        : '',
                 'config_file' : default_config_filename,
                 'dmflags'     : 0,

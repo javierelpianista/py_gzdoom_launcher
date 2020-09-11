@@ -4,22 +4,12 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import os
 import run_command
-from variables import wad_dirs, default_config_filename, main_dir, profile_dir
+from variables import wad_dirs, default_config_filename, main_dir, profile_dir, config_dir
 from profile import Profile
 
 class CreateProfileWindow(tk.Toplevel):
     def cancel(self):
         self.destroy()
-
-    def get_listbox_selection(self, val):
-        sender = val.widget
-        inds   = sender.curselection()
-
-        #values.clear()
-        for idx in inds:
-            values.append(sender.get(idx))
-
-        return(values)
 
     def select_profile_name(self):
         profile_name = filedialog.asksaveasfilename(
@@ -31,32 +21,53 @@ class CreateProfileWindow(tk.Toplevel):
         self.profile_entry.delete(0, tk.END)
         self.profile_entry.insert(0, profile_name)
 
+    # Update this window to reflect the properties of the edited profile
+    def read_profile(self):
+        self.profile_entry.insert(0, self.profile.name)
+
+        items = list(self.wads_listbox.get(0, tk.END))
+        for wad in self.profile.wads:
+            ind = items.index(wad)
+            self.wads_listbox.select_set(ind)
+
+        self.iwads_listbox.selection_clear(0, tk.END)
+        items = list(self.iwads_listbox.get(0, tk.END))
+        ind = items.index(self.profile.iwad)
+        self.iwads_listbox.select_set(ind)
+
+        self.dmflags1_entry.insert(0, self.profile.dmflags)
+        self.dmflags2_entry.insert(0, self.profile.dmflags2)
+
     def select_config_filename(self):
         config_filename   = filedialog.asksaveasfilename()
         self.config_file_entry.delete(0, tk.END)
         self.config_file_entry.insert(0, config_filename)
 
-    def create_profile(self, parent):
+    def save_profile(self, parent):
         selected_iwad = self.iwads_listbox.get(self.iwads_listbox.curselection())
         selected_wads_list = [self.wads_listbox.get(x) for x in self.wads_listbox.curselection()]
         profile_name = self.profile_entry.get()
-        config_file = self.config_file_entry.get()
+        config_file = os.path.join(config_dir, profile_name + '.ini')
         
         profile = Profile(
+                name = profile_name, 
                 wads = selected_wads_list,
                 iwad = selected_iwad,
                 config_file = config_file,
-                dmflags = 0,
-                dmflags2 = 0
+                dmflags = self.dmflags1_entry.get(),
+                dmflags2 = self.dmflags2_entry.get()
                 )
 
         profile_filename = os.path.join(profile_dir, profile_name + '.gzd')
 
+        ans = True
         if os.path.exists(profile_filename):
-            messagebox.showerror(
+            ans = messagebox.askyesno(
                     title   = 'Profile exists', 
-                    message = 'ERROR! Profile {} already exists.'.format(profile_name))
-        else:
+                    message = 'WARNING! Profile {} exists. Continue?'.format(profile_name)
+                    )
+
+        if ans:
             print('Generating profile: {}'.format(profile_name))
             print(profile.get_info())
             profile.save(profile_filename)
@@ -67,13 +78,19 @@ class CreateProfileWindow(tk.Toplevel):
             # Update the parent's listbox with the new profile
             parent.profile_listbox.update()
 
-    def __init__(self, parent):
+    def __init__(self, parent, profile_name = None):
         super().__init__(
                 master = parent
                 )
 
-        #self = tk.Toplevel(parent)
-        self.title('Profile generator')
+        if profile_name:
+            self.profile = Profile.from_file(
+                    os.path.join(profile_dir, profile_name + '.gzd')
+                    )
+        else:
+            self.profile = Profile.default()
+
+        self.title('Create/Edit profile')
         self.attributes('-type', 'dialog')
         self.grab_set()
     
@@ -175,34 +192,51 @@ class CreateProfileWindow(tk.Toplevel):
 
         self.frame_wads.pack(pady = 5, fill = tk.BOTH, expand = True)
 
-        ###############################################################################
-        # This frame lets the user choose the configuration file bound to the profile #
-        ###############################################################################
-        self.frame_config = tk.Frame(
+        ##########################################################
+        # This frame has the options to set dmflags and dmflags2 #
+        ##########################################################
+        self.frame_dmflags = tk.Frame(
                 master = self,
                 )
-        self.config_label = ttk.Label(
-                master = self.frame_config,
-                text   = 'Configuration file'
-                )
-    
-        self.config_file_entry = ttk.Entry(
-                master = self.frame_config,
-                )
-    
-        self.config_file_entry.insert(0, default_config_filename)
-    
-        self.browse_config_button = ttk.Button(
-                master  = self.frame_config,
-                text    = 'Browse...',
-                command = self.select_config_filename
-                )
-    
-        self.config_label.pack()
-        self.config_file_entry.pack(side = tk.LEFT, fill = tk.X, expand = True, padx = 5)
-        self.browse_config_button.pack(side = tk.RIGHT, padx = 5)
 
-        self.frame_config.pack(fill = tk.X, pady = 5)
+        self.frame_dmflags1 = tk.Frame(
+                master = self.frame_dmflags,
+                )
+
+        self.dmflags1_label = ttk.Label(
+                master = self.frame_dmflags1,
+                text   = 'dmflags'
+                )
+    
+        self.dmflags1_entry = ttk.Entry(
+                master = self.frame_dmflags1,
+                )
+
+        self.dmflags1_label.pack()
+        self.dmflags1_entry.pack(fill = tk.X, expand = True)
+        self.frame_dmflags1.pack(side = tk.LEFT, fill = tk.X, expand = True, padx = 5)
+    
+        self.frame_dmflags2 = tk.Frame(
+                master = self.frame_dmflags,
+                )
+
+        self.dmflags2_label = ttk.Label(
+                master = self.frame_dmflags2,
+                text   = 'dmflags2'
+                )
+    
+        self.dmflags2_entry = ttk.Entry(
+                master = self.frame_dmflags2,
+                )
+
+        self.dmflags2_label.pack()
+        self.dmflags2_entry.pack(fill = tk.X, expand = True)
+        self.frame_dmflags2.pack(side = tk.RIGHT, fill = tk.X, expand = True, padx = 5)
+
+        self.dmflags2_label.pack()
+        self.dmflags2_entry.pack()
+    
+        self.frame_dmflags.pack(fill = tk.X, pady = 5)
     
         #############################################################
         # This frame contains the create profile and cancel buttons #
@@ -213,8 +247,8 @@ class CreateProfileWindow(tk.Toplevel):
 
         self.profile_button = ttk.Button(
                 master  = self.frame_buttons,
-                text    = 'Create profile', 
-                command = lambda: self.create_profile(parent),
+                text    = 'Save profile', 
+                command = lambda: self.save_profile(parent),
                 )
 
         self.profile_button.pack(side = tk.LEFT, expand = True, fill = tk.X, padx = 5)
@@ -227,3 +261,5 @@ class CreateProfileWindow(tk.Toplevel):
 
         self.back_button.pack(side = tk.RIGHT, expand = True, fill = tk.X, padx = 5)
         self.frame_buttons.pack(fill = tk.X, pady = 5)
+
+        self.read_profile()

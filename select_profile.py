@@ -3,7 +3,9 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from variables import profile_dir
 from create_profile import CreateProfileWindow
+from edit_profile import EditProfileWindow
 from run_command import backup_profile, detect_profiles
+from profile import Profile
 
 class ProfileListbox(tk.Listbox):
     def update(self):
@@ -33,36 +35,33 @@ class SelectProfileWindow(tk.Tk):
         self.profile_listbox.delete(tk.ACTIVE)
 
     def edit_profile(self):
-        messagebox.showerror(
-                title = 'ERROR!',
-                message = 'Work in progress'
-                )
+        profile_name = self.profile_listbox.get(tk.ACTIVE)
+
+        window = CreateProfileWindow(self, profile_name)
 
     def launch_create_window(self):
         window = CreateProfileWindow(self)
 
     def run_gzdoom(self):
-        messagebox.showerror(
-                title = 'ERROR!',
-                message = 'Work in progress'
-                )
-        # If the user let the default, we have to generate a ListboxSelect event to use the default
-        # value.
-        #command = 'gzdoom' 
-        #for wad in selected_wads_list:
-        #    command += ' -file {}'.format(wad)
+        profile_name = self.profile_listbox.get(tk.ACTIVE)
+        profile_filename = os.path.join(profile_dir, profile_name + '.gzd')
+        profile = Profile.from_file(profile_filename)
 
-        #iwad_name = selected_iwads_list[0]
-        #command += ' -iwad {}'.format(iwad_name)
+        command = 'gzdoom' 
+        command += ' -iwad {}'.format(profile.iwad)
 
-        #config_filename = config_file_entry.get()
-        #command += ' -config {}'.format(config_filename)
+        for wad in profile.wads:
+            command += ' -file {}'.format(wad)
 
-        #window.destroy()
+        command += ' -config {}'.format(profile.config_file)
+        command += ' +set dmflags {} +set dmflags2 {}'.format(profile.dmflags, profile.dmflags2)
 
-        #print('Running gzdoom with the following command...')
-        #print(command)
-        #os.system(command)
+        self.destroy()
+
+        print('Running gzdoom with the following command...')
+        print(command)
+
+        os.system(command)
 
 
     def __init__(self):
