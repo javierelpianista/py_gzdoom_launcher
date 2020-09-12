@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import os
 import run_command
-from variables import wad_dirs, default_config_filename, main_dir, profile_dir, config_dir
+import variables
 from profile import Profile
 
 class CreateProfileWindow(tk.Toplevel):
@@ -47,7 +47,7 @@ class CreateProfileWindow(tk.Toplevel):
         selected_iwad = self.iwads_listbox.get(self.iwads_listbox.curselection())
         selected_wads_list = [self.wads_listbox.get(x) for x in self.wads_listbox.curselection()]
         profile_name = self.profile_entry.get()
-        config_file = os.path.join(config_dir, profile_name + '.ini')
+        config_file = os.path.join(variables.variables['config_dir'], profile_name + '.ini')
         
         profile = Profile(
                 name = profile_name, 
@@ -58,7 +58,7 @@ class CreateProfileWindow(tk.Toplevel):
                 dmflags2 = self.dmflags2_entry.get()
                 )
 
-        profile_filename = os.path.join(profile_dir, profile_name + '.gzd')
+        profile_filename = os.path.join(variables.variables['profile_dir'], profile_name + '.gzd')
 
         ans = True
         if os.path.exists(profile_filename):
@@ -85,7 +85,7 @@ class CreateProfileWindow(tk.Toplevel):
 
         if profile_name:
             self.profile = Profile.from_file(
-                    os.path.join(profile_dir, profile_name + '.gzd')
+                    os.path.join(variables.variables['profile_dir'], profile_name + '.gzd')
                     )
         else:
             self.profile = Profile.default()
@@ -152,7 +152,7 @@ class CreateProfileWindow(tk.Toplevel):
                 )
  
         ## Get the list of available wad files
-        wad_list, iwad_list = run_command.get_list_of_wad_files(wad_dirs)
+        wad_list, iwad_list = run_command.get_list_of_wad_files(variables.variables['wad_dirs'])
 
         for n, iwad in enumerate(iwad_list):
             self.iwads_listbox.insert(tk.END, iwad) 

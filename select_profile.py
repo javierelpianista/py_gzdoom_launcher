@@ -1,9 +1,9 @@
 import os
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
-from variables import profile_dir
+from tkinter import ttk, filedialog, messagebox, simpledialog
+import variables
 from create_profile import CreateProfileWindow
-from edit_profile import EditProfileWindow
+from configure_window import ConfigureWindow
 from run_command import backup_profile, detect_profiles
 from profile import Profile
 
@@ -24,8 +24,8 @@ class ProfileListbox(tk.Listbox):
 
         self.update()
 
-class SelectProfileWindow(tk.Tk):
-    def handle_exit(self, event):
+class SelectProfileWindow(tk.Toplevel):
+    def handle_exit(self, event = None):
         quit()
 
     def delete_profile(self):
@@ -37,14 +37,17 @@ class SelectProfileWindow(tk.Tk):
     def edit_profile(self):
         profile_name = self.profile_listbox.get(tk.ACTIVE)
 
-        window = CreateProfileWindow(self, profile_name)
+        CreateProfileWindow(self, profile_name)
 
     def launch_create_window(self):
-        window = CreateProfileWindow(self)
+        CreateProfileWindow(self)
+
+    def launch_configure_window(self):
+        ConfigureWindow(self)
 
     def run_gzdoom(self):
         profile_name = self.profile_listbox.get(tk.ACTIVE)
-        profile_filename = os.path.join(profile_dir, profile_name + '.gzd')
+        profile_filename = os.path.join(variables.variables['profile_dir'], profile_name + '.gzd')
         profile = Profile.from_file(profile_filename)
 
         command = 'gzdoom' 
@@ -56,21 +59,72 @@ class SelectProfileWindow(tk.Tk):
         command += ' -config {}'.format(profile.config_file)
         command += ' +set dmflags {} +set dmflags2 {}'.format(profile.dmflags, profile.dmflags2)
 
-        self.destroy()
-
         print('Running gzdoom with the following command...')
         print(command)
 
         os.system(command)
+        quit()
 
+    def copy_profile(self):
+        profile_name = self.profile_listbox.get(tk.ACTIVE)
 
-    def __init__(self):
-        super().__init__()
+        new_profile_name = simpledialog.askstring(
+                parent  = self,
+                title   = 'Copy profile',
+                prompt  = 'New profile name: '
+                )
+
+        copy_config = messagebox.askyesno(
+                master = self,
+                title  = "Copy profile",
+                message = 'Copy configuration file?'
+                )
+
+        profile = Profile.from_name(profile_name)
+        profile.copy(new_profile_name, copy_config = copy_config)
+        self.profile_listbox.update()
+
+    def launch_about_window(self):
+        tk.messagebox.showinfo(
+                title   = 'About',
+                message = 'Written by Javier Garcia\njavier.garcia.tw@hotmail.com'
+                )
+
+    def __init__(self, master):
+        super().__init__(master)
 
         self.title('GZDoom launcher')
         self.attributes('-type', 'dialog')
         self.grab_set()
         self.bind('<Control-q>', self.handle_exit)
+
+        #################################
+        # Here we configure the menubar #
+        #################################
+
+        self.menubar = tk.Menu(self)
+        self.config(menu = self.menubar)
+
+        # File menu
+        self.filemenu = tk.Menu(self.menubar, tearoff=0)
+        self.filemenu.add_command(label = 'New profile...', command = self.launch_create_window)
+        self.filemenu.add_separator()
+        self.filemenu.add_command(
+                label = 'Quit', 
+                command = self.handle_exit,
+                accelerator = 'Ctrl+Q'
+                )
+        self.menubar.add_cascade(label = 'File', menu = self.filemenu)
+
+        # Options menu
+        self.optionsmenu = tk.Menu(self.menubar, tearoff = 0)
+        self.optionsmenu.add_command(label = 'Configure...', command = self.launch_configure_window)
+        self.menubar.add_cascade(label = 'Options', menu = self.optionsmenu)
+
+        # Help menu
+        self.helpmenu = tk.Menu(self.menubar, tearoff = 0)
+        self.helpmenu.add_command(label = 'About...', command = self.launch_about_window)
+        self.menubar.add_cascade(label = 'Help', menu = self.helpmenu)
 
         #####################################################################
         # This frame will contain a listbox with all the available profiles #
@@ -112,6 +166,14 @@ class SelectProfileWindow(tk.Tk):
 
         self.edit_button.pack(pady = (0, 5))
 
+        self.copy_button = ttk.Button(
+                master  = self.buttons_frame,
+                text    = 'Copy',
+                command = self.copy_profile
+                )
+
+        self.copy_button.pack(pady = (0, 5))
+
         self.delete_button = ttk.Button(
                 master  = self.buttons_frame,
                 text    = 'Delete',
@@ -142,7 +204,3 @@ class SelectProfileWindow(tk.Tk):
 
         self.upper_frame.pack(fill = tk.BOTH, expand = True)
         self.commands_frame.pack(padx = 5, pady = 5)
-
-# Get list of available profiles
-
-# ---------------------------------------------------------------------------------------------------
