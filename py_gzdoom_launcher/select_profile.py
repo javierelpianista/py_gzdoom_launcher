@@ -49,6 +49,7 @@ class SelectProfileWindow(tk.Tk):
     def launch_configure_window(self):
         if not variables.variables['set']: 
             variables.set_defaults()
+
         ConfigureWindow(self)
 
     def run_gzdoom(self):
@@ -216,7 +217,6 @@ class SelectProfileWindow(tk.Tk):
         self.grab_set()
 
         self.bind('<Control-q>', self.handle_exit)
-        self.bind('<FocusIn>', self.update)
 
         if not found:
             messagebox.showinfo(
