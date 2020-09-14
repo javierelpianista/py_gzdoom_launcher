@@ -1,19 +1,23 @@
 import os
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, simpledialog
-import variables
-from create_profile import CreateProfileWindow
-from configure_window import ConfigureWindow
-from run_command import backup_profile, detect_profiles
-from profile import Profile
+from py_gzdoom_launcher import variables
+from py_gzdoom_launcher.create_profile import CreateProfileWindow
+from py_gzdoom_launcher.configure_window import ConfigureWindow
+from py_gzdoom_launcher.run_command import backup_profile, detect_profiles
+from py_gzdoom_launcher.profile import Profile
 
 class ProfileListbox(tk.Listbox):
     def update(self):
         self.delete(0, tk.END)
-        profile_names = detect_profiles()
-        for profile_name in profile_names:
-            self.insert(tk.END, profile_name)
-        self.select_set(0)
+        try:
+            profile_names = detect_profiles()
+            for profile_name in profile_names:
+                self.insert(tk.END, profile_name)
+            self.select_set(0)
+        except:
+            print('detect_profiles() failed')
+            pass
 
     def __init__(self, parent):
         super().__init__(
@@ -24,7 +28,7 @@ class ProfileListbox(tk.Listbox):
 
         self.update()
 
-class SelectProfileWindow(tk.Toplevel):
+class SelectProfileWindow(tk.Tk):
     def handle_exit(self, event = None):
         quit()
 
@@ -43,6 +47,8 @@ class SelectProfileWindow(tk.Toplevel):
         CreateProfileWindow(self)
 
     def launch_configure_window(self):
+        if not variables.variables['set']: 
+            variables.set_defaults()
         ConfigureWindow(self)
 
     def run_gzdoom(self):
@@ -90,14 +96,10 @@ class SelectProfileWindow(tk.Toplevel):
                 message = 'Written by Javier Garcia\njavier.garcia.tw@hotmail.com'
                 )
 
-    def __init__(self, master):
-        super().__init__(master)
+    def update(self, event = None):
+        self.profile_listbox.update()
 
-        self.title('GZDoom launcher')
-        self.attributes('-type', 'dialog')
-        self.grab_set()
-        self.bind('<Control-q>', self.handle_exit)
-
+    def populate(self):
         #################################
         # Here we configure the menubar #
         #################################
@@ -204,3 +206,23 @@ class SelectProfileWindow(tk.Toplevel):
 
         self.upper_frame.pack(fill = tk.BOTH, expand = True)
         self.commands_frame.pack(padx = 5, pady = 5)
+
+    def __init__(self, found = True):
+        super().__init__()
+
+        self.title('GZDoom launcher')
+        if os.name != 'nt':
+            self.attributes('-type', 'dialog')
+        self.grab_set()
+
+        self.bind('<Control-q>', self.handle_exit)
+        self.bind('<FocusIn>', self.update)
+
+        if not found:
+            messagebox.showinfo(
+                    title = 'First time?',
+                    message = 'It looks like it is the first time you are running py_gzdoom_launcher. Please set the configuration with Options/Configure...'
+                    )
+
+        self.populate()
+

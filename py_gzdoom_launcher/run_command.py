@@ -1,7 +1,7 @@
 import os 
 import re
 import glob
-import variables
+from py_gzdoom_launcher import variables
 
 def get_list_of_wad_files(wad_dirs):
     filelist = [item for wad_dir in variables.variables['wad_dirs'].split(':') for item in os.listdir(wad_dir)]

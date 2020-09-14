@@ -1,6 +1,6 @@
 import os
 import shutil
-import variables
+from py_gzdoom_launcher import variables
 
 class Profile:
     def __init__(self, **kwargs):

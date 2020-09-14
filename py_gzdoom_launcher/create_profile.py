@@ -3,9 +3,9 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import os
-import run_command
-import variables
-from profile import Profile
+from py_gzdoom_launcher import run_command
+from py_gzdoom_launcher import variables
+from py_gzdoom_launcher.profile import Profile
 
 class CreateProfileWindow(tk.Toplevel):
     def cancel(self):
@@ -83,6 +83,11 @@ class CreateProfileWindow(tk.Toplevel):
                 master = parent
                 )
 
+        self.title('Create/Edit profile')
+        if not os.name == 'nt':
+            self.attributes('-type', 'dialog')
+        self.grab_set()
+
         if profile_name:
             self.profile = Profile.from_file(
                     os.path.join(variables.variables['profile_dir'], profile_name + '.gzd')
@@ -90,10 +95,6 @@ class CreateProfileWindow(tk.Toplevel):
         else:
             self.profile = Profile.default()
 
-        self.title('Create/Edit profile')
-        self.attributes('-type', 'dialog')
-        self.grab_set()
-    
         ########################################
         # This frame contains the profile name #
         ########################################
