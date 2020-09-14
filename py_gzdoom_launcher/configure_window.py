@@ -19,8 +19,6 @@ class FrameEntryBrowse(ttk.Frame):
         return self.entry.get()
 
     def browse_filename(self, initial_dir, dialog_title, filetype):
-        print('Opening dialog with initialdir = {}'.format(initial_dir))
-
         if filetype == 'dir':
             filename = filedialog.askdirectory(
                     initialdir = os.path.dirname(initial_dir),
@@ -84,6 +82,7 @@ class ConfigureWindow(tk.Toplevel):
         #variables.variables['config_dir']   = self.frame_config.get_value()
         variables.variables['executable']   = self.frame_executable.get_value()
         variables.variables['wad_dirs']     = self.frame_wads.get_value()
+        variables.variables['iwad_dir']     = self.frame_iwad.get_value()
         variables.variables['default_iwad'] = os.path.basename(self.frame_iwad.get_value())
 
         variables.write_config()
@@ -147,6 +146,16 @@ class ConfigureWindow(tk.Toplevel):
         #        )
 
         #self.frame_config.pack( fill = tk.X, padx = 5, pady = 5 )
+
+        # IWAD directory
+        self.frame_iwads = FrameEntryBrowse(
+                master = self,
+                text   = 'IWADs directory',
+                initial_value = variables.variables['iwad_dir'],
+                filetype      = 'dir'
+                )
+
+        self.frame_iwads.pack( fill = tk.X, padx = 5, pady = 5 )
 
         # WADs directory
         self.frame_wads = FrameEntryBrowse(

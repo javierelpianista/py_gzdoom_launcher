@@ -56,11 +56,11 @@ class SelectProfileWindow(tk.Tk):
         profile_filename = os.path.join(variables.variables['profile_dir'], profile_name + '.gzd')
         profile = Profile.from_file(profile_filename)
 
-        command = 'gzdoom' 
+        command = variables.variables['executable']
         command += ' -iwad {}'.format(profile.iwad)
 
         for wad in profile.wads:
-            command += ' -file {}'.format(wad)
+            command += ' -file {}'.format(os.path.join(variables.variables['wad_dirs'], wad))
 
         command += ' -config {}'.format(profile.config_file)
         command += ' +set dmflags {} +set dmflags2 {}'.format(profile.dmflags, profile.dmflags2)

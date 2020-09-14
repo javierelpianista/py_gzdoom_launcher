@@ -21,7 +21,6 @@ class CreateProfileWindow(tk.Toplevel):
         self.profile_entry.delete(0, tk.END)
         self.profile_entry.insert(0, profile_name)
 
-    # Update this window to reflect the properties of the edited profile
     def read_profile(self):
         self.profile_entry.insert(0, self.profile.name)
 
@@ -48,6 +47,7 @@ class CreateProfileWindow(tk.Toplevel):
         selected_wads_list = [self.wads_listbox.get(x) for x in self.wads_listbox.curselection()]
         profile_name = self.profile_entry.get()
         config_file = os.path.join(variables.variables['config_dir'], profile_name + '.ini')
+        os.makedirs(variables.variables['config_dir'], exist_ok = True)
         
         profile = Profile(
                 name = profile_name, 
@@ -59,6 +59,7 @@ class CreateProfileWindow(tk.Toplevel):
                 )
 
         profile_filename = os.path.join(variables.variables['profile_dir'], profile_name + '.gzd')
+        os.makedirs(variables.variables['profile_dir'], exist_ok = True)
 
         ans = True
         if os.path.exists(profile_filename):

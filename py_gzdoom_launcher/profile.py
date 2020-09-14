@@ -44,7 +44,11 @@ class Profile:
             if data[0].strip() == 'IWAD'              : kwargs['iwad']        = data[1].strip()
             if data[0].strip() == 'dmflags'           : kwargs['dmflags']     = data[1].strip()
             if data[0].strip() == 'dmflags2'          : kwargs['dmflags2']    = data[1].strip()
-            if data[0].strip() == 'Configuration file': kwargs['config_file'] = data[1].strip()
+            if data[0].strip() == 'Configuration file': 
+                if os.name == 'nt':
+                    kwargs['config_file'] = ':'.join(data[1:]).strip()
+                else:
+                    kwargs['config_file'] = data[1].strip()
 
             if data[0].strip() == 'WADs':
                 wads_list = data[1].split(',')
