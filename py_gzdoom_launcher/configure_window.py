@@ -77,18 +77,13 @@ class FrameEntryBrowse(ttk.Frame):
 
 class ConfigureWindow(tk.Toplevel):
     def accept(self):
-        #variables.variables['main_dir']     = self.frame_directory.get_value()
-        #variables.variables['profile_dir']  = self.frame_profile.get_value()
-        #variables.variables['config_dir']   = self.frame_config.get_value()
         variables.variables['executable']   = self.frame_executable.get_value()
         variables.variables['wad_dirs']     = self.frame_wads.get_value()
-        variables.variables['iwad_dir']     = self.frame_iwad.get_value()
+        # For now we set the iwad dir to be in the same place as the wad one. May change in the future.
+        variables.variables['iwad_dir']     = self.frame_wads.get_value()
         variables.variables['default_iwad'] = os.path.basename(self.frame_iwad.get_value())
 
         variables.write_config()
-        #os.makedirs(variables.variables['main_dir'],    exist_ok = True)
-        #os.makedirs(variables.variables['profile_dir'], exist_ok = True)
-        #os.makedirs(variables.variables['config_dir'],  exist_ok = True)
 
         messagebox.showinfo(
                 master  = self,
@@ -148,14 +143,14 @@ class ConfigureWindow(tk.Toplevel):
         #self.frame_config.pack( fill = tk.X, padx = 5, pady = 5 )
 
         # IWAD directory
-        self.frame_iwads = FrameEntryBrowse(
-                master = self,
-                text   = 'IWADs directory',
-                initial_value = variables.variables['iwad_dir'],
-                filetype      = 'dir'
-                )
+        #self.frame_iwads = FrameEntryBrowse(
+        #        master = self,
+        #        text   = 'IWADs directory',
+        #        initial_value = variables.variables['iwad_dir'],
+        #        filetype      = 'dir'
+        #        )
 
-        self.frame_iwads.pack( fill = tk.X, padx = 5, pady = 5 )
+        #self.frame_iwads.pack( fill = tk.X, padx = 5, pady = 5 )
 
         # WADs directory
         self.frame_wads = FrameEntryBrowse(
@@ -180,13 +175,12 @@ class ConfigureWindow(tk.Toplevel):
 
         self.frame_iwad.pack( fill = tk.X, padx = 5, pady = 5 )
 
-
         # Buttons to accept configuration changes or back them
         self.frame_buttons = ttk.Frame(master = self)
 
         self.button_accept = ttk.Button(
                 master  = self.frame_buttons,
-                text    = 'OK',
+                text    = 'Save',
                 command = self.accept
                 )
 

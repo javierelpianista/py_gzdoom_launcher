@@ -4,6 +4,7 @@ import glob
 from py_gzdoom_launcher import variables
 
 def get_list_of_wad_files(wad_dirs):
+    print('wad_dirs: ', wad_dirs)
     if os.name == 'nt':
         filelist = os.listdir(wad_dirs)
     else:
@@ -22,6 +23,9 @@ def get_list_of_wad_files(wad_dirs):
             iwad_files.append(filename)
         else:
             wad_files.append(filename)
+
+    wad_files  = sorted(wad_files)
+    iwad_files = sorted(iwad_files)
 
     return wad_files, iwad_files
 

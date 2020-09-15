@@ -185,6 +185,28 @@ class SelectProfileWindow(tk.Tk):
 
         self.delete_button.pack(pady = (0, 5))
 
+        self.separator = ttk.Separator(
+                master = self.buttons_frame,
+                orient = tk.HORIZONTAL,
+                )
+
+        self.separator.pack(
+                pady   = 5,
+                fill   = tk.X,
+                expand = True )
+
+        self.button_refresh = ttk.Button(
+                master  = self.buttons_frame,
+                text    = 'Refresh',
+                command = self.update
+                )
+
+        self.button_refresh.pack(pady = (0,5))
+
+        ################################################
+        # This frame contains the run and exit buttons #
+        ################################################
+
         self.commands_frame = ttk.Frame(
                 master = self
                 )
