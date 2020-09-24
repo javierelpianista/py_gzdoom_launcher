@@ -60,3 +60,18 @@ def detect_profiles():
 
     return profile_names
 
+def launch_gzdoom(profile):
+    command = variables.variables['executable']
+    command += ' -iwad {}'.format(profile.iwad)
+
+    for wad in profile.wads:
+        command += ' -file {}'.format(os.path.join(variables.variables['wad_dirs'], wad))
+
+    command += ' -config {}'.format(profile.config_file)
+    command += ' +set dmflags {} +set dmflags2 {}'.format(profile.dmflags, profile.dmflags2)
+
+    print('Running gzdoom with the following command...')
+    print(command)
+
+    os.system(command)
+    quit()

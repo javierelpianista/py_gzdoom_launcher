@@ -2,10 +2,13 @@ from setuptools import setup, find_packages
 
 setup(
         name     = 'py_gzdoom_launcher',
-        version  = '0.0.11',
+        version  = '0.0.12',
         entry_points = {
             'gui_scripts' : [
                 'pygzdl = py_gzdoom_launcher.main:main'
+                ],
+            'console_scripts' : [
+                'pygzdl-run = py_gzdoom_launcher.main:run_profile'
                 ]
             },
         author   = 'Javier Garcia', 
