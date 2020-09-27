@@ -19,6 +19,16 @@ class Profile:
             if key == 'dmflags2'   : self.dmflags2 = val   
             if key == 'config_file': self.config_file = val
 
+    def dict(self):
+        return {
+                'name'        : self.name,
+                'iwad'        : self.iwad,
+                'wads'        : self.wads,
+                'dmflags'     : self.dmflags,
+                'dmflags2'    : self.dmflags2,
+                'config_file' : self.config_file
+                }
+
     @classmethod
     def default(cls):
         kwargs = {
@@ -37,29 +47,8 @@ class Profile:
     def from_file(cls, filename):
         kwargs = {}
         read_file = open(filename, 'r')
-
-        for line in read_file.readlines():
-            data = line.strip().split(':')
-            if data[0].strip() == 'Profile name'      : kwargs['name']        = data[1].strip()
-            if data[0].strip() == 'IWAD'              : kwargs['iwad']        = data[1].strip()
-            if data[0].strip() == 'dmflags'           : kwargs['dmflags']     = data[1].strip()
-            if data[0].strip() == 'dmflags2'          : kwargs['dmflags2']    = data[1].strip()
-            if data[0].strip() == 'Configuration file': 
-                if os.name == 'nt':
-                    kwargs['config_file'] = ':'.join(data[1:]).strip()
-                else:
-                    kwargs['config_file'] = data[1].strip()
-
-            if data[0].strip() == 'WADs':
-                wads_list = data[1].split(',')
-                kwargs['wads'] = []
-                for x in wads_list:
-                    if x.strip():
-                        kwargs['wads'].append(x.strip())
-                
-        profile = Profile(**kwargs)
-
-        return profile
+        profile_dict = eval(read_file.read())
+        return Profile(**profile_dict)
 
     @classmethod
     def from_name(cls, profile_name):
@@ -82,9 +71,7 @@ class Profile:
         return info
 
     def save(self, filename):
-        info = self.get_info()
-
-        open(filename, 'w').write(self.get_info())
+        print(self.dict(), file = open(filename, 'w'))
 
     def copy(self, new_name, copy_config = False):
         profile2 = Profile()
@@ -104,16 +91,9 @@ class Profile:
 
         profile2.save(os.path.join(variables.variables['profile_dir'], new_name + '.gzd'))
 
-    #command = 'gzdoom' 
-    #for wad in selected_wads_list:
-    #    command += ' -file {}'.format(wad)
-
-    #iwad_name = selected_iwads_list[0]
-    #command += ' -iwad {}'.format(iwad_name)
-
-    #config_filename = config_file_entry.get()
-    #command += ' -config {}'.format(config_filename)
-
-    #print('Running gzdoom with the following command...')
-    #print(command)
-    #os.system(command)
+if __name__ == '__main__':
+    variables.set_defaults()
+    profile = Profile.default()
+    profile.save('f1')
+    profile2 = Profile.from_file('f1')
+    print(profile2.get_info())
