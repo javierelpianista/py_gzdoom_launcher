@@ -6,6 +6,7 @@ import os
 from py_gzdoom_launcher import run_command
 from py_gzdoom_launcher import variables
 from py_gzdoom_launcher.profile import Profile
+from py_gzdoom_launcher.gameplay_options import get_flags
 
 class CreateProfileWindow(tk.Toplevel):
     def cancel(self):
@@ -24,10 +25,9 @@ class CreateProfileWindow(tk.Toplevel):
     def read_profile(self):
         self.profile_entry.insert(0, self.profile.name)
 
-        items = list(self.wads_listbox.get(0, tk.END))
+        #items = list(self.wads_listbox.get(0, tk.END))
         for wad in self.profile.wads:
-            ind = items.index(wad)
-            self.wads_listbox.select_set(ind)
+            self.wads_listbox.insert(tk.END, wad)
 
         self.iwads_listbox.selection_clear(0, tk.END)
         items = list(self.iwads_listbox.get(0, tk.END))
@@ -36,11 +36,6 @@ class CreateProfileWindow(tk.Toplevel):
 
         self.dmflags1_entry.insert(0, self.profile.dmflags)
         self.dmflags2_entry.insert(0, self.profile.dmflags2)
-
-    def select_config_filename(self):
-        config_filename   = filedialog.asksaveasfilename()
-        self.config_file_entry.delete(0, tk.END)
-        self.config_file_entry.insert(0, config_filename)
 
     def save_profile(self, parent):
         selected_iwad = self.iwads_listbox.get(self.iwads_listbox.curselection())
@@ -51,7 +46,7 @@ class CreateProfileWindow(tk.Toplevel):
         
         profile = Profile(
                 name = profile_name, 
-                wads = selected_wads_list,
+                wads = self.wads_listbox.get(0, tk.END),
                 iwad = selected_iwad,
                 config_file = config_file,
                 dmflags = self.dmflags1_entry.get(),
@@ -73,11 +68,62 @@ class CreateProfileWindow(tk.Toplevel):
             print(profile.get_info())
             profile.save(profile_filename)
             messagebox.showinfo(
-                    title    = 'Profile created', 
-                    message  = 'Profile {} created successfully'.format(profile_name)
+                    title    = 'Profile saved', 
+                    message  = 'Profile {} saved successfully'.format(profile_name)
                     )
             # Update the parent's listbox with the new profile
             parent.profile_listbox.update()
+
+    def set_flags(self, kind):
+        if kind == 'dmflags':
+            result = get_flags(
+                    self, 
+                    initial_flag_value = int(self.dmflags1_entry.get()),
+                    kind = 'dmflags' 
+                    )
+
+            self.dmflags1_entry.delete(0, tk.END)
+            self.dmflags1_entry.insert(0, str(result))
+
+        elif kind == 'dmflags2':
+            result = get_flags(
+                    self, 
+                    initial_flag_value = int(self.dmflags2_entry.get()),
+                    kind = 'dmflags2' 
+                    )
+
+            self.dmflags2_entry.delete(0, tk.END)
+            self.dmflags2_entry.insert(0, str(result))
+
+    def add_files(self):
+        files = filedialog.askopenfilenames(
+                initialdir = variables.variables['wad_dirs']
+                )
+
+        already_there = self.wads_listbox.get(0, tk.END)
+        for fname in files:
+            if not fname in already_there:
+                self.wads_listbox.insert(tk.END, fname)
+
+    def remove_file(self):
+        ind = self.wads_listbox.curselection()
+        self.wads_listbox.delete(ind)
+
+    def move(self, where):
+        if where == 'down': 
+            delta = 1
+        elif where == 'up':
+            delta = -1
+
+        ind = self.wads_listbox.curselection()
+        name = self.wads_listbox.get(ind)
+        self.wads_listbox.delete(ind)
+        new_ind = ind[0] + delta
+        new_ind = max(new_ind, 0)
+        new_ind = min(new_ind, self.wads_listbox.size())
+        self.wads_listbox.insert(new_ind, name)
+        self.wads_listbox.select_clear(0, tk.END)
+        self.wads_listbox.select_set(new_ind)
 
     def __init__(self, parent, profile_name = None):
         super().__init__(
@@ -115,11 +161,11 @@ class CreateProfileWindow(tk.Toplevel):
         self.profile_label.pack()
         self.profile_entry.pack(fill = tk.X, expand = True, padx = 5)
 
-        self.frame_profile.pack(fill = tk.X, pady = 5)
+        self.frame_profile.pack(fill = tk.X, padx = 5, pady = 5)
 
         #####################################################################
         # The following frame will contain two horizontally located frames. #
-        # One for IWADs and another one for WADs.                           #
+        # One for IWADs and another one the gameplay options                #
         #####################################################################
         self.frame_wads = ttk.Frame(
                 master = self, 
@@ -162,43 +208,11 @@ class CreateProfileWindow(tk.Toplevel):
         self.iwads_listbox.select_set(0)
         self.iwads_listbox.pack(expand = True, fill = tk.BOTH, padx = 5, pady = (0, 5))
 
-        # Here is the frame with available WADs
-        self.frame_wads_wads = tk.Frame(
-                master = self.frame_wads,
-                )
-
-        self.frame_wads_wads.pack(
-                fill = tk.BOTH,
-                expand = True,
-                side = tk.RIGHT,
-                padx = 5
-                )
-
-        self.wads_listbox = tk.Listbox(
-                master          = self.frame_wads_wads,
-                selectmode      = tk.MULTIPLE,
-                exportselection = False
-                )
-
-        for n, wad in enumerate(wad_list):
-            self.wads_listbox.insert(tk.END, wad)
-
-        self.label_wad = ttk.Label(
-                master = self.frame_wads_wads,
-                text   = "Available WADs",
-                )
-
-        self.label_wad.pack()
-        self.wads_listbox.pack(expand = True, fill = tk.BOTH, padx = 5, pady = (0, 5))
-
-
-        self.frame_wads.pack(pady = 5, fill = tk.BOTH, expand = True)
-
         ##########################################################
         # This frame has the options to set dmflags and dmflags2 #
         ##########################################################
         self.frame_dmflags = tk.Frame(
-                master = self,
+                master = self.frame_wads,
                 )
 
         self.frame_dmflags1 = tk.Frame(
@@ -207,16 +221,25 @@ class CreateProfileWindow(tk.Toplevel):
 
         self.dmflags1_label = ttk.Label(
                 master = self.frame_dmflags1,
-                text   = 'dmflags'
+                text   = 'dmflags', 
+                anchor = 'c'
                 )
     
         self.dmflags1_entry = ttk.Entry(
                 master = self.frame_dmflags1,
+                width  = 14
                 )
 
-        self.dmflags1_label.pack()
-        self.dmflags1_entry.pack(fill = tk.X, expand = True)
-        self.frame_dmflags1.pack(side = tk.LEFT, fill = tk.X, expand = True, padx = 5)
+        self.dmflags1_button = ttk.Button(
+                master = self.frame_dmflags1,
+                text   = 'Generate',
+                command = lambda : self.set_flags('dmflags')
+                )
+
+        self.dmflags1_label.pack(fill = tk.X)
+        self.dmflags1_entry.pack(side = tk.LEFT, fill = tk.X, padx = 5)
+        self.dmflags1_button.pack(side = tk.RIGHT, fill = tk.X, padx = 5)
+        self.frame_dmflags1.pack(fill = tk.X, expand = True, padx = 5)
     
         self.frame_dmflags2 = tk.Frame(
                 master = self.frame_dmflags,
@@ -224,22 +247,105 @@ class CreateProfileWindow(tk.Toplevel):
 
         self.dmflags2_label = ttk.Label(
                 master = self.frame_dmflags2,
-                text   = 'dmflags2'
+                text   = 'dmflags2',
+                anchor = 'c'
                 )
     
         self.dmflags2_entry = ttk.Entry(
                 master = self.frame_dmflags2,
+                width  = 14
                 )
 
-        self.dmflags2_label.pack()
-        self.dmflags2_entry.pack(fill = tk.X, expand = True)
-        self.frame_dmflags2.pack(side = tk.RIGHT, fill = tk.X, expand = True, padx = 5)
+        self.dmflags2_button = ttk.Button(
+                master  = self.frame_dmflags2,
+                text    = 'Generate',
+                command = lambda : self.set_flags('dmflags2')
+                )
+
+        self.dmflags2_label.pack(fill = tk.X)
+        self.dmflags2_entry.pack(side = tk.LEFT, fill = tk.X, padx = 5)
+        self.dmflags2_button.pack(side = tk.RIGHT, fill = tk.X, padx = 5)
+        self.frame_dmflags2.pack(fill = tk.X, expand = True, padx = 5)
 
         self.dmflags2_label.pack()
         self.dmflags2_entry.pack()
     
         self.frame_dmflags.pack(fill = tk.X, pady = 5)
+
+        #Here we pack the frame with the IWADs and dmflags
+        self.frame_wads.pack(pady = 5, fill = tk.BOTH, expand = True)
     
+        #########################################
+        # Here is the frame with available WADs #
+        #########################################
+        self.frame_wads_wads = tk.Frame(
+                master = self,
+                )
+
+        self.frame_wads_wads.pack(
+                fill = tk.BOTH,
+                expand = True,
+                padx = 5
+                )
+
+        self.wads_listbox = tk.Listbox(
+                master          = self.frame_wads_wads,
+                selectmode      = tk.SINGLE,
+                exportselection = False, 
+                width           = 40
+                )
+
+        #for n, wad in enumerate(wad_list):
+        #    self.wads_listbox.insert(tk.END, wad)
+
+        self.label_wad = ttk.Label(
+                master = self.frame_wads_wads,
+                text   = "Additional files",
+                )
+
+        self.frame_wads_buttons = ttk.Frame(
+                master = self.frame_wads_wads
+                )
+
+        self.button_add_wad = ttk.Button(
+                master  = self.frame_wads_buttons,
+                text    = 'Add...', 
+                command = self.add_files
+                )
+
+        self.button_up = ttk.Button(
+                master  = self.frame_wads_buttons,
+                text    = '⬆️',
+                command = lambda: self.move('up'),
+                )
+
+        self.button_down = ttk.Button(
+                master  = self.frame_wads_buttons,
+                text    = '⬇️',
+                command = lambda: self.move('down')
+                )
+                
+        self.button_remove_wad = ttk.Button(
+                master  = self.frame_wads_buttons,
+                text    = 'Remove',
+                command = self.remove_file
+                )
+
+        self.label_wad.pack()
+
+        self.wads_listbox.pack(
+                expand = True, 
+                fill = tk.BOTH, 
+                side = tk.LEFT,
+                padx = 5, 
+                pady = (0, 5)
+                )
+        self.button_add_wad.pack(pady = 5)
+        self.button_up.pack(pady = 5)
+        self.button_down.pack(pady = 5)
+        self.button_remove_wad.pack(pady = 5)
+        self.frame_wads_buttons.pack()
+
         #############################################################
         # This frame contains the create profile and cancel buttons #
         #############################################################

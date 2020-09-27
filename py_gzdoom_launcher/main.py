@@ -15,6 +15,8 @@ from py_gzdoom_launcher.profile import Profile
 configuration_file = variables.variables['configuration_file']
 
 def init():
+    global found
+
     found = os.path.exists(configuration_file)
 
     if not found:
@@ -24,10 +26,22 @@ def init():
     else:
         variables.read_config(configuration_file)
 
-def main(args):
+def main():
     init()
 
-    main_window = SelectProfileWindow(found)
+    # Do not do anything, just print out the command
+    dry_run = False
+
+    args = sys.argv[1:]
+
+    while len(args) > 0:
+        arg = args.pop(0)
+
+        if arg == '--dry-run':
+            dry_run = True
+            print('dry_run')
+
+    main_window = SelectProfileWindow(found, dry_run = dry_run)
     tk.mainloop()
 
 def help_run_profile():

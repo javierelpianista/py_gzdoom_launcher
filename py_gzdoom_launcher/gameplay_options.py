@@ -87,7 +87,7 @@ class DmFlagsWindow(tk.Toplevel):
             dmflag += button.option.mult*button.option.val
 
         self.flag_value = dmflag
-        self.label_flag.config(text = 'dmflags: {}'.format(dmflag))
+        self.label_flag.config(text = '{}: {}'.format(self.title(), dmflag))
 
     def return_flag(self):
         return self.flag_value
@@ -111,7 +111,7 @@ class DmFlagsWindow(tk.Toplevel):
         self.flag_value = self.initial_flag_value
         self.destroy()
 
-    def __init__(self, master, options, flag_value = 0):
+    def __init__(self, master, options, flag_value = 0, title = ''):
         super().__init__(master)
 
         if not os.name == 'nt':
@@ -121,10 +121,11 @@ class DmFlagsWindow(tk.Toplevel):
         self.buttons = []
         self.initial_flag_value = flag_value
         self.flag_value = flag_value
+        self.title(title)
 
         self.label_flag = ttk.Label(
                 master = self,
-                text   = 'dmflags: {}'.format(self.flag_value)
+                text   = '{}: {}'.format(self.title(), self.flag_value)
                 )
 
         self.label_flag.grid(row = 0, columnspan = 2, pady = (5, 10))
@@ -180,11 +181,11 @@ class DmFlagsWindow(tk.Toplevel):
 
         self.set_flags()
 
-def get_flags(parent, initial_flag_value = 0, kind = 'dmflags1'):
-    if kind == 'dmflags1':
-        window2 = DmFlagsWindow(parent, dmflags, flag_value = initial_flag_value)
+def get_flags(parent, initial_flag_value = 0, kind = 'dmflags'):
+    if kind == 'dmflags':
+        window2 = DmFlagsWindow(parent, dmflags, flag_value = initial_flag_value, title = kind)
     elif kind == 'dmflags2':
-        window2 = DmFlagsWindow(parent, dmflags2, flag_value = initial_flag_value)
+        window2 = DmFlagsWindow(parent, dmflags2, flag_value = initial_flag_value, title = kind)
     else:
         raise Exception('kind {} not recognized'.format(kind))
 

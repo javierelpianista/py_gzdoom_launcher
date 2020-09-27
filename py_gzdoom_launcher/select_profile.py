@@ -6,6 +6,7 @@ from py_gzdoom_launcher.create_profile import CreateProfileWindow
 from py_gzdoom_launcher.configure_window import ConfigureWindow
 from py_gzdoom_launcher.run_command import backup_profile, detect_profiles
 from py_gzdoom_launcher.profile import Profile
+import pkg_resources
 
 class ProfileListbox(tk.Listbox):
     def update(self):
@@ -69,7 +70,9 @@ class SelectProfileWindow(tk.Tk):
         print('Running gzdoom with the following command...')
         print(command)
 
-        os.system(command)
+        if not self.dry_run:
+            os.system(command)
+
         quit()
 
     def copy_profile(self):
@@ -92,9 +95,13 @@ class SelectProfileWindow(tk.Tk):
         self.profile_listbox.update()
 
     def launch_about_window(self):
+        try:
+            version_number = 'v' + pkg_resources.require('py_gzdoom_launcher')[0].version
+        except:
+            version_number = 'Git version'
         tk.messagebox.showinfo(
                 title   = 'About',
-                message = 'Written by Javier Garcia\njavier.garcia.tw@hotmail.com'
+                message = 'py_gzdoom_launcher {}\nWritten by Javier Garcia\njavier.garcia.tw@hotmail.com'.format(version_number)
                 )
 
     def update(self, event = None):
@@ -230,7 +237,7 @@ class SelectProfileWindow(tk.Tk):
         self.upper_frame.pack(fill = tk.BOTH, expand = True)
         self.commands_frame.pack(padx = 5, pady = 5)
 
-    def __init__(self, found = True):
+    def __init__(self, found = True, dry_run = False):
         super().__init__()
 
         self.title('GZDoom launcher')
@@ -239,6 +246,8 @@ class SelectProfileWindow(tk.Tk):
         self.grab_set()
 
         self.bind('<Control-q>', self.handle_exit)
+
+        self.dry_run = dry_run
 
         if not found:
             messagebox.showinfo(
