@@ -29,7 +29,7 @@ class Profile:
                 'dmflags'     : 0,
                 'dmflags2'    : 0
                 }
-        profile = Profile(**kwargs)
+        profile = cls(**kwargs)
 
         return profile
 
@@ -57,14 +57,14 @@ class Profile:
                     if x.strip():
                         kwargs['wads'].append(x.strip())
                 
-        profile = Profile(**kwargs)
+        profile = cls(**kwargs)
 
         return profile
 
     @classmethod
     def from_name(cls, profile_name):
         filename = os.path.join(variables.variables['profile_dir'], profile_name + '.gzd')
-        return Profile.from_file(filename)
+        return cls.from_file(filename)
 
     def get_info(self):
         info = ''
@@ -103,17 +103,3 @@ class Profile:
             )
 
         profile2.save(os.path.join(variables.variables['profile_dir'], new_name + '.gzd'))
-
-    #command = 'gzdoom' 
-    #for wad in selected_wads_list:
-    #    command += ' -file {}'.format(wad)
-
-    #iwad_name = selected_iwads_list[0]
-    #command += ' -iwad {}'.format(iwad_name)
-
-    #config_filename = config_file_entry.get()
-    #command += ' -config {}'.format(config_filename)
-
-    #print('Running gzdoom with the following command...')
-    #print(command)
-    #os.system(command)
