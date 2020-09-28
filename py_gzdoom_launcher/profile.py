@@ -39,7 +39,7 @@ class Profile:
                 'dmflags'     : 0,
                 'dmflags2'    : 0
                 }
-        profile = Profile(**kwargs)
+        profile = cls(**kwargs)
 
         return profile
 
@@ -48,12 +48,12 @@ class Profile:
         kwargs = {}
         read_file = open(filename, 'r')
         profile_dict = eval(read_file.read())
-        return Profile(**profile_dict)
+        return cls(**profile_dict)
 
     @classmethod
     def from_name(cls, profile_name):
         filename = os.path.join(variables.variables['profile_dir'], profile_name + '.gzd')
-        return Profile.from_file(filename)
+        return cls.from_file(filename)
 
     def get_info(self):
         info = ''
@@ -90,10 +90,3 @@ class Profile:
             )
 
         profile2.save(os.path.join(variables.variables['profile_dir'], new_name + '.gzd'))
-
-if __name__ == '__main__':
-    variables.set_defaults()
-    profile = Profile.default()
-    profile.save('f1')
-    profile2 = Profile.from_file('f1')
-    print(profile2.get_info())
