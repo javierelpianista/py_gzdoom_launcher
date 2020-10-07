@@ -67,6 +67,12 @@ class SelectProfileWindow(tk.Tk):
         command += ' -config {}'.format(profile.config_file)
         command += ' +set dmflags {} +set dmflags2 {}'.format(profile.dmflags, profile.dmflags2)
 
+        if self.intvar_useopts.get() == 1:
+            warp_level = self.entry_level.get()
+            difficulty = self.strvar_difficulty.get()
+            command += ' -warp {}'.format(warp_level)
+            command += ' -skill {}'.format(difficulty)
+
         print('Running gzdoom with the following command...')
         print(command)
 
@@ -106,6 +112,23 @@ class SelectProfileWindow(tk.Tk):
 
     def update(self, event = None):
         self.profile_listbox.update()
+
+    def toggle_fade(self, event = None):
+        if self.intvar_useopts.get() == 0:
+            self.label_level.pack_forget()
+            self.entry_level.pack_forget()
+            self.label_difficulty.pack_forget()
+            self.menu_difficulty.pack_forget()
+            self.frame_level.pack_forget()
+            self.frame_difficulty.pack_forget()
+
+        elif self.intvar_useopts.get() == 1:
+            self.frame_level.pack(side = tk.LEFT, fill = tk.X, padx = 10)
+            self.frame_difficulty.pack(side = tk.RIGHT, fill = tk.X, padx = 10)
+            self.label_level.pack(side = tk.LEFT)
+            self.entry_level.pack(side = tk.RIGHT, padx = 5)
+            self.label_difficulty.pack(side = tk.LEFT)
+            self.menu_difficulty.pack(side = tk.RIGHT, padx = 10)
 
     def populate(self):
         #################################
@@ -210,6 +233,75 @@ class SelectProfileWindow(tk.Tk):
 
         self.button_refresh.pack(pady = (0,5))
 
+        ###########################################
+        # This frame contains some launch options #
+        ###########################################
+        self.settings_frame = tk.Frame(
+                master = self,
+                )
+
+        # Check this box if you want the following 
+        # options to have an effect
+        self.intvar_useopts = tk.IntVar()
+        self.intvar_useopts.set(0)
+
+        self.checkbox_useopts = ttk.Checkbutton(
+                self.settings_frame,
+                text    = 'Launch with options',
+                var     = self.intvar_useopts,
+                command = self.toggle_fade
+                )
+
+        self.checkbox_useopts.pack(fill = tk.X, expand = True)
+
+        # Setting the initial level
+        self.frame_level = tk.Frame(
+                master = self.settings_frame,
+                )
+
+        self.label_level = ttk.Label(
+                master = self.frame_level,
+                text   = 'Warp'
+                )
+
+        self.entry_level = ttk.Entry(
+                master  = self.frame_level,
+                width   = 3,
+                justify = tk.RIGHT
+                )
+
+        self.entry_level.insert(0, '1')
+
+        # Setting the difficulty level 
+        self.frame_difficulty = tk.Frame(
+                master = self.settings_frame,
+                )
+
+        self.strvar_difficulty = tk.StringVar(self)
+        self.strvar_difficulty.set("4")
+
+        self.label_difficulty = ttk.Label(
+                master = self.frame_difficulty,
+                text   = 'Difficulty',
+                )
+
+        self.menu_difficulty = ttk.OptionMenu(
+                self.frame_difficulty,
+                self.strvar_difficulty,
+                "4",
+                "1", "2", "3", "4", "5",
+                )
+
+        self.menu_difficulty.config( width = 1 )
+
+        self.label_level.pack(side = tk.LEFT)
+        self.entry_level.pack(side = tk.RIGHT, padx = 5)
+        self.frame_level.pack(side = tk.LEFT, fill = tk.X, padx = 10)
+
+        self.label_difficulty.pack(side = tk.LEFT)
+        self.menu_difficulty.pack(side = tk.RIGHT, padx = 10)
+        self.frame_difficulty.pack(side = tk.RIGHT, fill = tk.X, padx = 10)
+
         ################################################
         # This frame contains the run and exit buttons #
         ################################################
@@ -235,7 +327,17 @@ class SelectProfileWindow(tk.Tk):
         self.exit_button.pack(side = tk.RIGHT, expand = True, fill = tk.X, padx = 5)
 
         self.upper_frame.pack(fill = tk.BOTH, expand = True)
+        self.separator_1 = ttk.Separator(self, orient=tk.HORIZONTAL)
+        self.separator_1.pack(fill = tk.X, expand = True, padx = 5, pady = 5)
+        self.settings_frame.pack(fill = tk.X)
+        self.separator_2 = ttk.Separator(self, orient=tk.HORIZONTAL)
+        self.separator_2.pack(fill = tk.X, expand = True, padx = 5, pady = 5)
         self.commands_frame.pack(padx = 5, pady = 5)
+
+        self.label_level.pack_forget()
+        self.label_difficulty.pack_forget()
+        self.entry_level.pack_forget()
+        self.menu_difficulty.pack_forget()
 
     def __init__(self, found = True, dry_run = False):
         super().__init__()

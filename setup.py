@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
         name     = 'py_gzdoom_launcher',
-        version  = '0.0.15',
+        version  = '0.0.16',
         entry_points = {
             'gui_scripts' : [
                 'pygzdl = py_gzdoom_launcher.main:main'
