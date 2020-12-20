@@ -76,6 +76,8 @@ class SelectProfileWindow(tk.Tk):
         print('Running gzdoom with the following command...')
         print(command)
 
+        self.quit()
+
         if not self.dry_run:
             os.system(command)
 

@@ -11,6 +11,7 @@ from py_gzdoom_launcher.configure_window import ConfigureWindow
 from py_gzdoom_launcher.run_command import launch_gzdoom, detect_profiles
 from py_gzdoom_launcher import variables
 from py_gzdoom_launcher.profile import Profile
+from py_gzdoom_launcher.version import VERSION_NUMBER
 
 configuration_file = variables.variables['configuration_file']
 
@@ -40,6 +41,10 @@ def main():
         if arg == '--dry-run':
             dry_run = True
             print('dry_run')
+
+        elif arg == '--version':
+            print("py_gzdoom_launcher. Version {}".format(VERSION_NUMBER))
+            quit()
 
     main_window = SelectProfileWindow(found, dry_run = dry_run)
     tk.mainloop()
@@ -78,6 +83,9 @@ def run_profile():
             quit()
         elif args[1] == '--help':
             help_run_profile()
+        elif args[1] == '--version':
+            print("py_gzdoom_launcher. Version {}".format(VERSION_NUMBER))
+            quit()
         else:
             profile_name = args[1]
 
