@@ -64,7 +64,7 @@ class SelectProfileWindow(tk.Tk):
         for wad in profile.wads:
             command += ' -file {}'.format(os.path.join(variables.variables['wad_dirs'], wad))
 
-        command += ' -config {}'.format(profile.config_file)
+        command += ' -config "{}"'.format(profile.config_file)
         command += ' +set dmflags {} +set dmflags2 {}'.format(profile.dmflags, profile.dmflags2)
 
         if self.intvar_useopts.get() == 1:
@@ -76,7 +76,7 @@ class SelectProfileWindow(tk.Tk):
         print('Running gzdoom with the following command...')
         print(command)
 
-        self.quit()
+        self.destroy()
 
         if not self.dry_run:
             os.system(command)

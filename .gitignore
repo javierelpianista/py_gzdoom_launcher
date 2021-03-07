@@ -1,1 +1,5 @@
 test-venv
+build
+dist
+py_gzdoom_launcher.egg-info
+tags

@@ -40,7 +40,6 @@ def main():
 
         if arg == '--dry-run':
             dry_run = True
-            print('dry_run')
 
         elif arg == '--version':
             print("py_gzdoom_launcher. Version {}".format(VERSION_NUMBER))
